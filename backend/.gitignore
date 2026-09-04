@@ -1,0 +1,9 @@
+# Fasalo backend secrets — NEVER commit real .env files.
+# Copy from .env.example: cp .env.example .env
+# This file is git-ignored.
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+*.log

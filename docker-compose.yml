@@ -1,0 +1,27 @@
+# PostgreSQL (transactional data: users, orders, escrow, logistics)
+postgres:
+  image: postgres:15-alpine
+  container_name: fasalo-postgres
+  restart: unless-stopped
+  environment:
+    POSTGRES_USER: fasalo
+    POSTGRES_PASSWORD: fasalo
+    POSTGRES_DB: fasalo
+  volumes:
+    - pg-data:/var/lib/postgresql/data
+  ports:
+    - "5432:5432"
+
+# MongoDB (listings/catalog + AI feature samples)
+mongodb:
+  image: mongo:7
+  container_name: fasalo-mongodb
+  restart: unless-stopped
+  environment:
+    MONGO_INITDB_ROOT_USERNAME: fasalo
+    MONGO_INITDB_ROOT_PASSWORD: fasalo
+  ports:
+    - "27017:27017"
+
+volumes:
+  pg-data:
