@@ -91,11 +91,59 @@ export interface Bid {
   updatedAt: string;
 }
 
+/** Demo-only KYC record. No identity document is stored in Fasalo. */
+export interface KycRecord {
+  id: string;
+  userId: string;
+  status: "not_started" | "submitted" | "verified" | "rejected";
+  submittedAt?: string;
+  verifiedAt?: string;
+  updatedAt: string;
+}
+
+/** Demo escrow ledger; it deliberately does not call a payment provider. */
+export interface EscrowPayment {
+  id: string;
+  orderId: string;
+  amount: number;
+  currency: "INR";
+  status: "held" | "released" | "refunded";
+  heldAt: string;
+  releasedAt?: string;
+  refundedAt?: string;
+  updatedAt: string;
+}
+
+export interface Review {
+  id: string;
+  orderId: string;
+  authorId: string;
+  recipientId: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
+export interface Dispute {
+  id: string;
+  orderId: string;
+  raisedById: string;
+  reason: string;
+  status: "open" | "in_review" | "resolved" | "rejected";
+  resolution?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Store {
   users: User[];
   listings: Listing[];
   orders: Order[];
   bids: Bid[];
+  kycRecords: KycRecord[];
+  escrowPayments: EscrowPayment[];
+  reviews: Review[];
+  disputes: Dispute[];
 }
 
 export interface PaginatedResult<T> {

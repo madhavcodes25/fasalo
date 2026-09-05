@@ -102,6 +102,11 @@ router.patch("/:id/status", requireAuth(), (req: AuthenticatedRequest, res) => {
 
   const updated = store.updateOrderStatus(order.id, newStatus as Order["status"]);
   if (!updated) return res.status(404).json({ error: "Order not found" });
+  if (updated.status === "confirmed") store.holdEscrow(updated);
+  if (updated.status === "cancelled") {
+    const payment = store.findEscrowByOrderId(updated.id);
+    if (payment?.status === "held") store.updateEscrowStatus(updated.id, "refunded");
+  }
   res.json(updated);
 });
 

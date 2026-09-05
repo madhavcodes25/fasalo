@@ -13,7 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { v4 as uuidv4 } from "uuid";
-import { type Bid, type BidStatus, type Listing, type Order, type PaginatedResult, type Store, type User } from "../models/index.js";
+import { type Bid, type BidStatus, type Dispute, type EscrowPayment, type KycRecord, type Listing, type Order, type PaginatedResult, type Review, type Store, type User } from "../models/index.js";
 
 const DATA_DIR = join(process.cwd(), "data");
 const STORE_PATH = join(DATA_DIR, "store.json");
@@ -21,10 +21,15 @@ const STORE_PATH = join(DATA_DIR, "store.json");
 function loadStore(): Store {
   if (existsSync(STORE_PATH)) {
     try {
-      return JSON.parse(readFileSync(STORE_PATH, "utf-8")) as Store;
+      const saved = JSON.parse(readFileSync(STORE_PATH, "utf-8")) as Partial<Store>;
+      return {
+        users: saved.users ?? [], listings: saved.listings ?? [], orders: saved.orders ?? [], bids: saved.bids ?? [],
+        kycRecords: saved.kycRecords ?? [], escrowPayments: saved.escrowPayments ?? [],
+        reviews: saved.reviews ?? [], disputes: saved.disputes ?? [],
+      };
     } catch { /* corrupt file — fall back to empty */ }
   }
-  return { users: [], listings: [], orders: [], bids: [] };
+  return { users: [], listings: [], orders: [], bids: [], kycRecords: [], escrowPayments: [], reviews: [], disputes: [] };
 }
 
 export class FasaloStore {
@@ -208,6 +213,104 @@ export class FasaloStore {
     return { ...bid };
   }
 
+  // ----- Phase 2: KYC, escrow, reviews, and disputes -----
+  getKycRecord(userId: string): KycRecord | undefined {
+    return this.data.kycRecords.find((record) => record.userId === userId);
+  }
+
+  submitKyc(userId: string): KycRecord {
+    const now = this.now();
+    const existing = this.getKycRecord(userId);
+    if (existing) {
+      existing.status = "submitted";
+      existing.submittedAt = now;
+      existing.updatedAt = now;
+      this.save();
+      return { ...existing };
+    }
+    const record: KycRecord = { id: this.newId(), userId, status: "submitted", submittedAt: now, updatedAt: now };
+    this.data.kycRecords.push(record);
+    this.save();
+    return { ...record };
+  }
+
+  mockVerifyKyc(userId: string): KycRecord {
+    const now = this.now();
+    const record = this.getKycRecord(userId) ?? this.submitKyc(userId);
+    record.status = "verified";
+    record.verifiedAt = now;
+    record.updatedAt = now;
+    this.updateUser(userId, { kycVerified: true });
+    this.save();
+    return { ...record };
+  }
+
+  findEscrowByOrderId(orderId: string): EscrowPayment | undefined {
+    return this.data.escrowPayments.find((payment) => payment.orderId === orderId);
+  }
+
+  holdEscrow(order: Order): EscrowPayment {
+    const existing = this.findEscrowByOrderId(order.id);
+    if (existing) return { ...existing };
+    const now = this.now();
+    const payment: EscrowPayment = { id: this.newId(), orderId: order.id, amount: order.totalPrice, currency: "INR", status: "held", heldAt: now, updatedAt: now };
+    this.data.escrowPayments.push(payment);
+    this.save();
+    return { ...payment };
+  }
+
+  updateEscrowStatus(orderId: string, status: EscrowPayment["status"]): EscrowPayment | undefined {
+    const payment = this.findEscrowByOrderId(orderId);
+    if (!payment) return undefined;
+    const now = this.now();
+    payment.status = status;
+    payment.updatedAt = now;
+    if (status === "released") payment.releasedAt = now;
+    if (status === "refunded") payment.refundedAt = now;
+    this.save();
+    return { ...payment };
+  }
+
+  createReview(input: Omit<Review, "id" | "createdAt">): Review {
+    const review: Review = { ...input, id: this.newId(), createdAt: this.now() };
+    this.data.reviews.push(review);
+    this.save();
+    return { ...review };
+  }
+
+  findReview(orderId: string, authorId: string): Review | undefined {
+    return this.data.reviews.find((review) => review.orderId === orderId && review.authorId === authorId);
+  }
+
+  listReviewsForUser(userId: string): Review[] {
+    return this.data.reviews.filter((review) => review.recipientId === userId).map((review) => ({ ...review }));
+  }
+
+  createDispute(input: Omit<Dispute, "id" | "createdAt" | "updatedAt" | "status">): Dispute {
+    const now = this.now();
+    const dispute: Dispute = { ...input, id: this.newId(), status: "open", createdAt: now, updatedAt: now };
+    this.data.disputes.push(dispute);
+    this.save();
+    return { ...dispute };
+  }
+
+  findDisputeById(id: string): Dispute | undefined { return this.data.disputes.find((dispute) => dispute.id === id); }
+
+  listDisputesForUser(userId: string): Dispute[] {
+    return this.data.disputes.filter((dispute) => {
+      const order = this.findOrderById(dispute.orderId);
+      return dispute.raisedById === userId || order?.farmerId === userId || order?.buyerId === userId;
+    }).map((dispute) => ({ ...dispute }));
+  }
+
+  updateDispute(id: string, patch: Pick<Dispute, "status"> & Partial<Pick<Dispute, "resolution">>): Dispute | undefined {
+    const dispute = this.findDisputeById(id);
+    if (!dispute) return undefined;
+    Object.assign(dispute, patch, { updatedAt: this.now() });
+    this.save();
+    return { ...dispute };
+  }
+
   // Pagination helper
   paginate<T>(items: T[], page: number, limit: number): PaginatedResult<T> {
     const total = items.length;
@@ -219,4 +322,4 @@ export class FasaloStore {
 
 export const store = FasaloStore.create();
 
-export type { Bid, Listing, Order, PaginatedResult, User, UserRole, BidStatus } from "../models/index.js";
+export type { Bid, Listing, Order, PaginatedResult, User, UserRole, BidStatus, KycRecord, EscrowPayment, Review, Dispute } from "../models/index.js";
