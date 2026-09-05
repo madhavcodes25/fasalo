@@ -1,6 +1,10 @@
 import express, { type Express } from "express";
 import cors from "cors";
-import routes from "./health";
+import healthRoutes from "./health.js";
+import authRoutes from "./routes/auth.js";
+import listingsRoutes from "./routes/listings.js";
+import ordersRoutes from "./routes/orders.js";
+import bidsRoutes from "./routes/bids.js";
 
 export function createApp(): Express {
   const app = express();
@@ -8,8 +12,12 @@ export function createApp(): Express {
   app.use(cors({ origin: true }));
   app.use(express.json());
 
-  // API root — Phase 0 only exposes /api/health
-  app.use("/api", routes);
+  // API routes (Phase 0: /api/health; Phase 1: auth, listings, orders, bids)
+  app.use("/api", healthRoutes);
+  app.use("/api/auth", authRoutes);
+  app.use("/api/listings", listingsRoutes);
+  app.use("/api/orders", ordersRoutes);
+  app.use("/api/bids", bidsRoutes);
 
   // Simple root route to prove the server is up
   app.get("/", (_req, res) => {
@@ -22,3 +30,4 @@ export function createApp(): Express {
 
   return app;
 }
+

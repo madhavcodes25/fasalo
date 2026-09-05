@@ -4,8 +4,8 @@
   "description": "Backend API for Fasalo - direct farmer-to-consumer digital marketplace (Smart India Hackathon 26033).",
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
     "outDir": "./dist",
     "rootDir": "./src",

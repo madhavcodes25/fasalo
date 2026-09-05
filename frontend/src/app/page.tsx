@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type HealthResponse = {
   status: string;
@@ -16,9 +17,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchHealth = () => {
-    setLoading(true);
-    setError(null);
+  const runHealthCheck = () =>
     fetch(`${BACKEND_URL}/api/health`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -33,10 +32,9 @@ export default function HomePage() {
       .finally(() => {
         setLoading(false);
       });
-  };
 
   useEffect(() => {
-    fetchHealth();
+    void runHealthCheck();
   }, []);
 
   return (
@@ -53,8 +51,24 @@ export default function HomePage() {
         <p className="mt-1 text-sm text-zinc-500">
           Smart India Hackathon • Problem Statement 26033 • Ministry of Consumer
           Affairs
-        </p>
+                  </p>
       </header>
+
+      {/* Marketplace entry points */}
+      <section className="mb-8 flex flex-wrap justify-center gap-3">
+        <Link
+          href="/browse"
+          className="rounded-md bg-emerald-600 px-6 py-3 text-sm font-medium text-white hover:bg-emerald-700"
+        >
+          Browse Marketplace
+        </Link>
+        <Link
+          href="/signup"
+          className="rounded-md border border-emerald-600 px-6 py-3 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+        >
+          Register as Farmer / Buyer
+        </Link>
+      </section>
 
       {/* Phase 0 — Backend Health Check demo */}
       <section className="w-full max-w-xl rounded-xl bg-white p-6 shadow ring-1 ring-black/5">
@@ -107,7 +121,11 @@ export default function HomePage() {
 
         <button
           type="button"
-          onClick={fetchHealth}
+          onClick={() => {
+            setLoading(true);
+            setError(null);
+            void runHealthCheck();
+          }}
           disabled={loading}
           className="mt-4 w-full rounded-md bg-emerald-600 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
         >

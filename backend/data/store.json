@@ -1,0 +1,80 @@
+{
+  "users": [
+    {
+      "name": "Demo Farmer",
+      "email": "farmer@fasalo.com",
+      "passwordHash": "$2b$10$XP/pSkQcsOZbPU2PjWn0be5tEyv8j803idHi56kMvE5UQ8qWDjrke",
+      "role": "farmer",
+      "village": "Ludhiana, Punjab",
+      "farmSizeAcres": 6,
+      "kycVerified": true,
+      "id": "u-farmer",
+      "createdAt": "2026-09-05T00:00:00.000Z",
+      "updatedAt": "2026-09-05T00:00:00.000Z"
+    },
+    {
+      "name": "Demo Consumer",
+      "email": "consumer@fasalo.com",
+      "passwordHash": "$2b$10$XP/pSkQcsOZbPU2PjWn0be5tEyv8j803idHi56kMvE5UQ8qWDjrke",
+      "role": "consumer",
+      "kycVerified": true,
+      "id": "u-consumer",
+      "createdAt": "2026-09-05T00:00:00.000Z",
+      "updatedAt": "2026-09-05T00:00:00.000Z"
+    },
+    {
+      "name": "Demo Bulk Buyer",
+      "email": "bulk@fasalo.com",
+      "passwordHash": "$2b$10$XP/pSkQcsOZbPU2PjWn0be5tEyv8j803idHi56kMvE5UQ8qWDjrke",
+      "role": "bulk_buyer",
+      "kycVerified": true,
+      "id": "u-bulk",
+      "createdAt": "2026-09-05T00:00:00.000Z",
+      "updatedAt": "2026-09-05T00:00:00.000Z"
+    }
+  ],
+  "listings": [
+    {
+      "farmerId": "u-farmer",
+      "cropName": "Tomato",
+      "variety": "Desi",
+      "quantity": 500,
+      "unit": "kg",
+      "pricePerUnit": 22,
+      "qualityGrade": "A",
+      "harvestDate": "2026-09-10",
+      "location": {
+        "lat": 30.9,
+        "lng": 75.9,
+        "address": "Ludhiana, Punjab"
+      },
+      "fpoAggregation": false,
+      "status": "active",
+      "id": "l-tomato",
+      "createdAt": "2026-09-05T00:00:00.000Z",
+      "updatedAt": "2026-09-05T00:00:00.000Z"
+    },
+    {
+      "farmerId": "u-farmer",
+      "cropName": "Onion",
+      "variety": "NASIK RED",
+      "quantity": 1200,
+      "unit": "kg",
+      "pricePerUnit": 18,
+      "qualityGrade": "B",
+      "harvestDate": "2026-09-12",
+      "location": {
+        "lat": 30.9,
+        "lng": 75.9,
+        "address": "Ludhiana, Punjab"
+      },
+      "fpoAggregation": true,
+      "status": "active",
+      "id": "l-onion",
+      "createdAt": "2026-09-05T00:00:00.000Z",
+      "updatedAt": "2026-09-05T00:00:00.000Z"
+    }
+  ],
+  "orders": [],
+  "bids": []
+}
