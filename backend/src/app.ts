@@ -5,6 +5,10 @@ import authRoutes from "./routes/auth.js";
 import listingsRoutes from "./routes/listings.js";
 import ordersRoutes from "./routes/orders.js";
 import bidsRoutes from "./routes/bids.js";
+import kycRoutes from "./routes/kyc.js";
+import paymentsRoutes from "./routes/payments.js";
+import reviewsRoutes from "./routes/reviews.js";
+import disputesRoutes from "./routes/disputes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -18,6 +22,10 @@ export function createApp(): Express {
   app.use("/api/listings", listingsRoutes);
   app.use("/api/orders", ordersRoutes);
   app.use("/api/bids", bidsRoutes);
+  app.use("/api/kyc", kycRoutes);
+  app.use("/api/payments", paymentsRoutes);
+  app.use("/api/reviews", reviewsRoutes);
+  app.use("/api/disputes", disputesRoutes);
 
   // Simple root route to prove the server is up
   app.get("/", (_req, res) => {

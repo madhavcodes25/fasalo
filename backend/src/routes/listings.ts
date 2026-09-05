@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { store } from "../db/store.js";
-import { requireFarmer, type AuthenticatedRequest } from "../middleware/auth.js";
+import { optionalAuth, requireFarmer, type AuthenticatedRequest } from "../middleware/auth.js";
 import type { Listing } from "../models/index.js";
 
 const router = Router();
@@ -25,7 +25,7 @@ function parseLocation(body: any) {
  *   ?cropName=Tomato&qualityGrade=A&farmerId=<id>
  * A farmer can pass ?mine=true to see only their own listings (requires auth).
  */
-router.get("/", (req, res) => {
+router.get("/", optionalAuth, (req: AuthenticatedRequest, res) => {
   const { cropName, qualityGrade, farmerId, mine, status } = req.query;
 
   const opts: Parameters<typeof store.listListings>[0] = {};

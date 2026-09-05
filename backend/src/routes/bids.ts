@@ -93,6 +93,7 @@ router.patch("/:id", requireFarmer(), (req: AuthenticatedRequest, res) => {
         store.applyOrderToListing(order);
     // Accepting a bid confirms the order immediately (price already settled).
     const confirmedOrder = store.updateOrderStatus(order.id, "confirmed");
+    if (confirmedOrder) store.holdEscrow(confirmedOrder);
     const updated = store.updateBidStatus(bid.id, "accepted", order.id);
     return res.json({ bid: updated, order: confirmedOrder });
   }

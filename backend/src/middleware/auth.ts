@@ -56,6 +56,28 @@ export function requireAuth(allowedRoles?: UserRole[]): (req: AuthenticatedReque
   };
 }
 
+/**
+ * Attach a valid signed-in user when a bearer token is present, while keeping
+ * public routes public. Route handlers can then opt into user-specific data.
+ */
+export function optionalAuth(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    next();
+    return;
+  }
+  try {
+    const token = authHeader.slice(7);
+    const payload = jwt.verify(token, env.jwtSecret) as { id: string; email: string; role: UserRole; name: string };
+    const user = store.findUserById(payload.id);
+    if (user) req.user = { id: user.id, email: user.email, role: user.role, name: user.name };
+  } catch {
+    // Public browsing still works with an expired client-side token. Protected
+    // branches (such as ?mine=true) perform their own authorization check.
+  }
+  next();
+}
+
 /** Convenience: requireAuth restricted to farmer/FPO roles. */
 export const requireFarmer = () => requireAuth(["farmer", "fpo"]);
 /** Convenience: requireAuth restricted to consumer/bulk-buyer roles. */
