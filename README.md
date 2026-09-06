@@ -133,12 +133,22 @@ Fasalo is a digital marketplace platform that eliminates unnecessary middlemen i
 ---
 
 ## Team / Submission Notes
-*(Add team name, members, and any SIH-specific submission details here)*
+
+> **Submission Ready:** ✅ Phase 0 through Phase 6 modules are integrated and ready for demonstration.
+
+**Team Name:** [Insert Team Name]
+**Members:**
+- [Member 1 Name] - [Role/Focus]
+- [Member 2 Name] - [Role/Focus]
+- [Member 3 Name] - [Role/Focus]
+
+**Demo Instructions:**
+Please refer to `DEMO_SCRIPT.md` for a structured 2-minute walkthrough covering the farmer's AI-assisted listing, consumer escrow payment, and real-time logistics advisory.
 
 ---
 
 ## Phase 6 Demo Readiness
-- Role-aware dashboards for farmer, buyer, and admin/institution accounts.
-- Order, delivery, top-crop, and sample market-price analytics.
-- English/Hindi toggle for core navigation and dashboard.
-- Guided presentation flow: `DEMO_SCRIPT.md`.
+- **Marketplace & Escrow:** End-to-end purchasing with stock management and hold/release payments.
+- **AI Integration:** FastAPI microservice hooked into frontend for dynamic price suggestions.
+- **Logistics & Ecosystem:** Role-aware dashboards for farmer, buyer, and admin, live weather API, and eNAM mock feeds.
+- **UI:** English/Hindi toggle, responsive mobile-first Tailwind design.

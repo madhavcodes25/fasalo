@@ -6,3 +6,7 @@ dist/
 *.log
 .env
 npm-debug.log*
+
+# Python virtual environments
+venv/
+*.venv/
