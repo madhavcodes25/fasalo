@@ -135,6 +135,31 @@ export interface Dispute {
   updatedAt: string;
 }
 
+/**
+ * Phase 3 demo logistics record. Transporter and cold-storage catalogues are
+ * intentionally mocked; this tracks the operational state of a real order.
+ */
+export type ShipmentStatus = "scheduled" | "picked_up" | "in_transit" | "out_for_delivery" | "delivered" | "cancelled";
+
+export interface ShipmentEvent {
+  status: ShipmentStatus;
+  note: string;
+  occurredAt: string;
+}
+
+export interface Shipment {
+  id: string;
+  orderId: string;
+  transporterId: string;
+  transporterName: string;
+  vehicleNumber: string;
+  status: ShipmentStatus;
+  estimatedDeliveryAt: string;
+  events: ShipmentEvent[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Store {
   users: User[];
   listings: Listing[];
@@ -144,6 +169,7 @@ export interface Store {
   escrowPayments: EscrowPayment[];
   reviews: Review[];
   disputes: Dispute[];
+  shipments: Shipment[];
 }
 
 export interface PaginatedResult<T> {

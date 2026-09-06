@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
-import type { Order } from "../../lib/types";
+import type { Order, Shipment } from "../../lib/types";
 
 const STATUS_COLORS: Record<Order["status"], string> = {
   ordered: "bg-blue-100 text-blue-800",
@@ -19,11 +19,16 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [shipments, setShipments] = useState<Shipment[]>([]);
 
   function loadOrders() {
     return api
       .get<Order[]>("/orders")
-      .then((data) => setOrders(data))
+      .then(async (data) => {
+        setOrders(data);
+        const shipmentData = await api.get<Shipment[]>("/logistics/shipments");
+        setShipments(shipmentData);
+      })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : "Failed to load orders"))
       .finally(() => setLoading(false));
   }
@@ -82,6 +87,10 @@ export default function OrdersPage() {
               <p className="text-xs text-zinc-500">
                 Buyer: {isFarmer ? (o.buyerId) : (o.farmerId)} · {o.type === "bulk_bid" ? "Bulk bid" : "Consumer order"}
               </p>
+              {(() => {
+                const shipment = shipments.find((entry) => entry.orderId === o.id);
+                return shipment ? <p className="mt-2 rounded-md bg-emerald-50 px-2 py-1 text-xs text-emerald-800">Logistics: <span className="font-semibold capitalize">{shipment.status.replaceAll("_", " ")}</span> · {shipment.transporterName}</p> : o.status === "confirmed" ? <p className="mt-2 text-xs text-amber-700">Logistics: awaiting transport scheduling</p> : null;
+              })()}
 
               {/* Farmer action buttons to advance the lifecycle */}
               {isFarmer && o.status === "ordered" && (

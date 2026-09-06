@@ -9,6 +9,8 @@ import kycRoutes from "./routes/kyc.js";
 import paymentsRoutes from "./routes/payments.js";
 import reviewsRoutes from "./routes/reviews.js";
 import disputesRoutes from "./routes/disputes.js";
+import logisticsRoutes from "./routes/logistics.js";
+import ecosystemRoutes from "./routes/ecosystem.js";
 
 export function createApp(): Express {
   const app = express();
@@ -26,6 +28,8 @@ export function createApp(): Express {
   app.use("/api/payments", paymentsRoutes);
   app.use("/api/reviews", reviewsRoutes);
   app.use("/api/disputes", disputesRoutes);
+  app.use("/api/logistics", logisticsRoutes);
+  app.use("/api/ecosystem", ecosystemRoutes);
 
   // Simple root route to prove the server is up
   app.get("/", (_req, res) => {

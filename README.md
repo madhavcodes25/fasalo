@@ -61,6 +61,8 @@ Fasalo is a digital marketplace platform that eliminates unnecessary middlemen i
 - **Real-time shipment tracking** for both farmer and buyer.
 - **Packaging and handling guidelines** by produce type (perishable vs. non-perishable).
 
+> **Phase 3 demo status:** Fasalo currently provides a static/mock cold-storage catalogue and transporter list, plus an authenticated shipment state machine (`scheduled → picked_up → in_transit → out_for_delivery → delivered`) tied to confirmed orders. These integrations do not yet have live availability, booking, GPS, or partner dispatch.
+
 ---
 
 ### 3. AI & Intelligence Layer
@@ -73,6 +75,8 @@ Fasalo is a digital marketplace platform that eliminates unnecessary middlemen i
 | **Quality Grading via Image Recognition** | Farmer uploads produce photo → AI auto-assigns quality grade, reducing manual inspection disputes. |
 | **Crop Recommendation Engine** | Suggests which crops to grow next season based on regional demand trends and price forecasts. |
 
+> **Phase 4 demo status:** `ai-services/` is a separate FastAPI service exposing demand forecast, route, price suggestion, and quality-grading endpoints. Forecast, route, and price use transparent sample-data heuristics; quality grading is an explicitly marked AI-ready mock until trained on a labelled image dataset.
+
 ---
 
 ### 4. Government & Ecosystem Integration
@@ -81,6 +85,8 @@ Fasalo is a digital marketplace platform that eliminates unnecessary middlemen i
 - **PM-KISAN / Agriculture Infrastructure Fund** — visibility into applicable subsidies/financing for farmers.
 - **IMD Weather Alerts** — tied into logistics planning (e.g., delay shipment if storm predicted).
 - **FPO Registry integration** — for verified aggregator onboarding.
+
+> **Phase 5 demo status:** Fasalo serves a static eNAM-shaped market-price feed for reliable demos, and proxies a live Open-Meteo weather forecast into a logistics/harvest advisory. The eNAM feed is not connected to a government API; weather is the live external integration.
 
 ---
 
@@ -128,3 +134,11 @@ Fasalo is a digital marketplace platform that eliminates unnecessary middlemen i
 
 ## Team / Submission Notes
 *(Add team name, members, and any SIH-specific submission details here)*
+
+---
+
+## Phase 6 Demo Readiness
+- Role-aware dashboards for farmer, buyer, and admin/institution accounts.
+- Order, delivery, top-crop, and sample market-price analytics.
+- English/Hindi toggle for core navigation and dashboard.
+- Guided presentation flow: `DEMO_SCRIPT.md`.

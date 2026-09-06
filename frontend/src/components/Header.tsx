@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Header() {
   const { user, logout, loading } = useAuth();
+  const { t, toggleLanguage } = useLanguage();
   const pathname = usePathname();
 
   const linkClass = (href: string) =>
@@ -27,25 +29,39 @@ export default function Header() {
             {user.role === "farmer" || user.role === "fpo" ? (
               <>
                 <Link href="/farmer" className={linkClass("/farmer")}>
-                  My Listings
+                  {t.listings}
                 </Link>
                 <Link href="/orders" className={linkClass("/orders")}>
-                  My Orders
+                  {t.orders}
+                </Link>
+                <Link href="/logistics" className={linkClass("/logistics")}>
+                  {t.logistics}
+                </Link>
+                <Link href="/advisories" className={linkClass("/advisories")}>
+                  {t.advisories}
                 </Link>
               </>
             ) : (
               <>
                 <Link href="/browse" className={linkClass("/browse")}>
-                  Browse
+                  {t.browse}
                 </Link>
                 <Link href="/orders" className={linkClass("/orders")}>
-                  My Orders
+                  {t.orders}
+                </Link>
+                <Link href="/logistics" className={linkClass("/logistics")}>
+                  {t.logistics}
+                </Link>
+                <Link href="/advisories" className={linkClass("/advisories")}>
+                  {t.advisories}
                 </Link>
               </>
             )}
             <span className="mx-2 text-sm text-zinc-400">
-              Hi, {user.name.split(" ")[0]}
+              {t.greeting}, {user.name.split(" ")[0]}
             </span>
+            <Link href="/dashboard" className={linkClass("/dashboard")}>{t.dashboard}</Link>
+            <button onClick={toggleLanguage} className="px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 rounded-md" aria-label="Toggle English and Hindi">{t.language}</button>
             <button
               onClick={logout}
               className="px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 rounded-md"

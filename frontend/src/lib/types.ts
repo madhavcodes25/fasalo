@@ -49,6 +49,48 @@ export interface Order {
   updatedAt: string;
 }
 
+export type ShipmentStatus = "scheduled" | "picked_up" | "in_transit" | "out_for_delivery" | "delivered" | "cancelled";
+
+export interface ShipmentEvent {
+  status: ShipmentStatus;
+  note: string;
+  occurredAt: string;
+}
+
+export interface Shipment {
+  id: string;
+  orderId: string;
+  transporterId: string;
+  transporterName: string;
+  vehicleNumber: string;
+  status: ShipmentStatus;
+  estimatedDeliveryAt: string;
+  events: ShipmentEvent[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Transporter {
+  id: string;
+  name: string;
+  vehicleNumber: string;
+  vehicleType: string;
+  capacityKg: number;
+  ratePerKm: number;
+  phone: string;
+}
+
+export interface ColdStorage {
+  id: string;
+  name: string;
+  location: string;
+  lat: number;
+  lng: number;
+  capacityTonnes: number;
+  availableTonnes: number;
+  contact: string;
+}
+
 export interface Bid {
   id: string;
   listingId: string;

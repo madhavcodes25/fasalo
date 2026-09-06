@@ -13,7 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { v4 as uuidv4 } from "uuid";
-import { type Bid, type BidStatus, type Dispute, type EscrowPayment, type KycRecord, type Listing, type Order, type PaginatedResult, type Review, type Store, type User } from "../models/index.js";
+import { type Bid, type BidStatus, type Dispute, type EscrowPayment, type KycRecord, type Listing, type Order, type PaginatedResult, type Review, type Shipment, type ShipmentStatus, type Store, type User } from "../models/index.js";
 
 const DATA_DIR = join(process.cwd(), "data");
 const STORE_PATH = join(DATA_DIR, "store.json");
@@ -25,11 +25,11 @@ function loadStore(): Store {
       return {
         users: saved.users ?? [], listings: saved.listings ?? [], orders: saved.orders ?? [], bids: saved.bids ?? [],
         kycRecords: saved.kycRecords ?? [], escrowPayments: saved.escrowPayments ?? [],
-        reviews: saved.reviews ?? [], disputes: saved.disputes ?? [],
+        reviews: saved.reviews ?? [], disputes: saved.disputes ?? [], shipments: saved.shipments ?? [],
       };
     } catch { /* corrupt file — fall back to empty */ }
   }
-  return { users: [], listings: [], orders: [], bids: [], kycRecords: [], escrowPayments: [], reviews: [], disputes: [] };
+  return { users: [], listings: [], orders: [], bids: [], kycRecords: [], escrowPayments: [], reviews: [], disputes: [], shipments: [] };
 }
 
 export class FasaloStore {
@@ -129,6 +129,7 @@ export class FasaloStore {
   }
 
   listOrdersForUser(userId: string, role: User["role"]): Order[] {
+    if (role === "admin") return this.data.orders.map((o) => ({ ...o }));
     if (role === "farmer" || role === "fpo") {
       return this.data.orders.filter((o) => o.farmerId === userId).map((o) => ({ ...o }));
     }
@@ -311,6 +312,47 @@ export class FasaloStore {
     return { ...dispute };
   }
 
+  // ─────────────────── Phase 3: Logistics ───────────────────
+  findShipmentByOrderId(orderId: string): Shipment | undefined {
+    return this.data.shipments.find((shipment) => shipment.orderId === orderId);
+  }
+
+  listShipmentsForUser(userId: string, role: User["role"]): Shipment[] {
+    if (role === "admin") return this.data.shipments.map((shipment) => ({ ...shipment, events: [...shipment.events] }));
+    return this.data.shipments
+      .filter((shipment) => {
+        const order = this.findOrderById(shipment.orderId);
+        return order?.farmerId === userId || order?.buyerId === userId;
+      })
+      .map((shipment) => ({ ...shipment, events: [...shipment.events] }));
+  }
+
+  createShipment(input: Omit<Shipment, "id" | "createdAt" | "updatedAt" | "status" | "events">): Shipment {
+    const now = this.now();
+    const shipment: Shipment = {
+      ...input,
+      id: this.newId(),
+      status: "scheduled",
+      events: [{ status: "scheduled", note: "Transport scheduled", occurredAt: now }],
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.data.shipments.push(shipment);
+    this.save();
+    return { ...shipment, events: [...shipment.events] };
+  }
+
+  updateShipmentStatus(id: string, status: ShipmentStatus, note?: string): Shipment | undefined {
+    const shipment = this.data.shipments.find((entry) => entry.id === id);
+    if (!shipment) return undefined;
+    const now = this.now();
+    shipment.status = status;
+    shipment.updatedAt = now;
+    shipment.events.push({ status, note: note?.trim() || status.replaceAll("_", " "), occurredAt: now });
+    this.save();
+    return { ...shipment, events: [...shipment.events] };
+  }
+
   // Pagination helper
   paginate<T>(items: T[], page: number, limit: number): PaginatedResult<T> {
     const total = items.length;
@@ -322,4 +364,4 @@ export class FasaloStore {
 
 export const store = FasaloStore.create();
 
-export type { Bid, Listing, Order, PaginatedResult, User, UserRole, BidStatus, KycRecord, EscrowPayment, Review, Dispute } from "../models/index.js";
+export type { Bid, Listing, Order, PaginatedResult, User, UserRole, BidStatus, KycRecord, EscrowPayment, Review, Dispute, Shipment, ShipmentStatus } from "../models/index.js";
