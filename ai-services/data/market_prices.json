@@ -1,0 +1,10 @@
+[
+  {"cropName": "Tomato", "region": "Nashik", "pricePerKg": 32},
+  {"cropName": "Tomato", "region": "Nashik", "pricePerKg": 35},
+  {"cropName": "Tomato", "region": "Pune", "pricePerKg": 30},
+  {"cropName": "Onion", "region": "Nashik", "pricePerKg": 25},
+  {"cropName": "Onion", "region": "Pune", "pricePerKg": 27},
+  {"cropName": "Potato", "region": "Pune", "pricePerKg": 24},
+  {"cropName": "Potato", "region": "Nashik", "pricePerKg": 22},
+  {"cropName": "Okra", "region": "Pune", "pricePerKg": 48}
+]

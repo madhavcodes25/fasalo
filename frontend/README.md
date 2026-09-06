@@ -6,13 +6,14 @@ farmer-to-consumer marketplace (Smart India Hackathon — Problem 26033).
 ## Prerequisites
 - Node.js >= 18
 - A running **backend** on `http://localhost:4000` (see `/backend`)
+- For the Phase 4 price-suggestion hook, the AI service on `http://localhost:8000` (see `/ai-services`)
 
 ## Local development
 
 ```bash
 cd frontend
 npm install
-cp .env.local.example .env.local   # set NEXT_PUBLIC_BACKEND_URL if your backend is elsewhere
+cp .env.local.example .env.local   # set backend/AI URLs if your services are elsewhere
 npm run dev        # http://localhost:3000
 ```
 

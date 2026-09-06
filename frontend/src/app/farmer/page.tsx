@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
+import { getPriceSuggestion, type PriceSuggestion } from "../../lib/ai";
 import type { Bid, Listing } from "../../lib/types";
 
 const GRADES = ["A", "B", "C", "D"] as const;
@@ -16,6 +17,8 @@ export default function FarmerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [priceSuggestion, setPriceSuggestion] = useState<PriceSuggestion | null>(null);
+  const [suggestingPrice, setSuggestingPrice] = useState(false);
   const [form, setForm] = useState({
     cropName: "", variety: "", quantity: "", pricePerUnit: "",
     qualityGrade: "A" as (typeof GRADES)[number], harvestDate: "", address: "", fpoAggregation: false,
@@ -58,6 +61,15 @@ export default function FarmerPage() {
 
   const update = (f: keyof typeof form, v: unknown) => setForm((p) => ({ ...p, [f]: v }));
 
+  async function suggestPrice() {
+    if (!form.cropName || !form.quantity) return setError("Enter a crop name and quantity to get a price suggestion");
+    setSuggestingPrice(true); setError("");
+    try {
+      setPriceSuggestion(await getPriceSuggestion({ cropName: form.cropName, qualityGrade: form.qualityGrade, quantityKg: Number(form.quantity), region: form.address || user?.village || "Nashik" }));
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : "Could not reach the AI service"); }
+    finally { setSuggestingPrice(false); }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.cropName || !form.quantity || !form.pricePerUnit || !form.harvestDate) return setError("Fill all required fields");
@@ -71,6 +83,7 @@ export default function FarmerPage() {
       });
       setShowForm(false);
       setForm({ cropName: "", variety: "", quantity: "", pricePerUnit: "", qualityGrade: "A", harvestDate: "", address: "", fpoAggregation: false });
+      setPriceSuggestion(null);
       setError(""); loadListings();
     } catch (err: unknown) { setError(err instanceof Error ? err.message : "Failed to create listing"); }
   }
@@ -104,6 +117,10 @@ export default function FarmerPage() {
               onChange={(e) => update("quantity", e.target.value)} className="rounded-md border border-zinc-300 px-3 py-2 text-sm" required />
             <input type="number" min={0} placeholder="Price per kg (₹)" value={form.pricePerUnit}
               onChange={(e) => update("pricePerUnit", e.target.value)} className="rounded-md border border-zinc-300 px-3 py-2 text-sm" required />
+            <div className="sm:col-span-2 flex flex-wrap items-center gap-3 rounded-lg bg-emerald-50 p-3">
+              <button type="button" onClick={suggestPrice} disabled={suggestingPrice} className="rounded-md border border-emerald-700 px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-100 disabled:opacity-50">{suggestingPrice ? "Checking market signal…" : "✨ Get AI price suggestion"}</button>
+              {priceSuggestion && <div className="text-sm text-emerald-900"><span className="font-semibold">Suggested: ₹{priceSuggestion.suggestedPricePerKg}/kg</span> <span className="text-emerald-700">(₹{priceSuggestion.recommendedRange.min}–₹{priceSuggestion.recommendedRange.max})</span><p className="text-xs text-emerald-700">Demo heuristic based on sample market data — review before listing.</p></div>}
+            </div>
             <select value={form.qualityGrade} onChange={(e) => update("qualityGrade", e.target.value as (typeof GRADES)[number])}
               className="rounded-md border border-zinc-300 px-3 py-2 text-sm">
               {GRADES.map((g) => <option key={g} value={g}>Grade {g}</option>)}
