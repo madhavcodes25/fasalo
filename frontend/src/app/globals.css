@@ -1,8 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #faf8f4;
+  --foreground: #1c1a14;
+
+  /* Sugarcane Green palette */
+  --green-50:  #f2f9f0;
+  --green-100: #dff2da;
+  --green-200: #b8e3af;
+  --green-500: #4a9c3d;
+  --green-600: #3a7d30;
+  --green-700: #2d6324;
+  --green-800: #1e4218;
+  --green-900: #122b0f;
+
+  /* Jute Brown palette */
+  --brown-50:  #fdf9f3;
+  --brown-100: #f5ead6;
+  --brown-200: #e8d0a3;
+  --brown-400: #c4965a;
+  --brown-500: #a87c42;
+  --brown-600: #8b6330;
+  --brown-700: #6d4d22;
+  --brown-800: #4f3618;
 }
 
 @theme inline {
@@ -19,10 +39,73 @@ body {
 }
 
 ::selection {
-  background: #6ee7b7;
-  color: #064e3b;
+  background: #b8e3af;
+  color: #1e4218;
 }
 
 * {
   box-sizing: border-box;
 }
+
+/* Fade-up animation for page entry */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease-out both;
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+.animate-slide-in-left {
+  animation: slideInLeft 0.45s ease-out both;
+}
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out both;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* Spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #b8e3af;
+  border-top-color: #3a7d30;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Google Translate cleanup */
+.goog-te-banner-frame, .goog-te-menu-value, .skiptranslate {
+  display: none !important;
+}
+body { top: 0 !important; }

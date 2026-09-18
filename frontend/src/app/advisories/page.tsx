@@ -8,11 +8,13 @@ import { api } from "../../lib/api";
 type MarketPrice = { cropName: string; market: string; modalPricePerKg: number; unit: string; observedOn: string };
 type Weather = { source: string; live: boolean; location: string; observedAt: string; current: { temperature_2m: number; precipitation: number; wind_speed_10m: number }; today: { rainChance: number; maxTemp?: number; minTemp?: number }; advisory: string };
 
-const CROP_EMOJIS: Record<string, string> = {
-  tomato: "🍅", onion: "🧅", potato: "🥔", okra: "🥬", wheat: "🌾",
-  corn: "🌽", mango: "🥭", garlic: "🧄", cauliflower: "🥦",
+const CROP_IMAGES: Record<string, string> = {
+  tomato: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=75",
+  onion: "https://upload.wikimedia.org/wikipedia/commons/2/25/Onion_on_White.JPG",
+  potato: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Patates.jpg",
+  default: "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=800&q=80",
 };
-function cropEmoji(name: string) { return CROP_EMOJIS[name.toLowerCase()] ?? "🌱"; }
+function cropImg(name: string) { return CROP_IMAGES[name.toLowerCase()] ?? CROP_IMAGES.default; }
 
 export default function AdvisoriesPage() {
   const { user, loading: authLoading } = useAuth();
@@ -25,99 +27,98 @@ export default function AdvisoriesPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) return router.replace("/login");
-    
-    // Auto-detect location for weather if available, otherwise default to Nashik
     const loc = user.village || "Nashik";
-    
     Promise.allSettled([
-      api.get<{ prices: MarketPrice[] }>("/ecosystem/enam-prices"), 
-      api.get<Weather>(`/ecosystem/weather?location=${encodeURIComponent(loc)}`)
-    ])
-      .then(([market, forecast]) => {
-        if (market.status === "fulfilled") setPrices(market.value.prices);
-        if (forecast.status === "fulfilled") setWeather(forecast.value);
-        else setError("Live weather data is temporarily unavailable. Market prices are still available.");
-      })
-      .finally(() => setLoading(false));
-  }, [authLoading, user, router]);
+      api.get<{ prices: MarketPrice[] }>("/ecosystem/enam-prices"),
+      api.get<Weather>(`/ecosystem/weather?location=${encodeURIComponent(loc)}`),
+    ]).then(([market, forecast]) => {
+      if (market.status === "fulfilled") setPrices(market.value.prices);
+      if (forecast.status === "fulfilled") setWeather(forecast.value);
+      else setError("Live weather is temporarily unavailable. Market prices are still shown.");
+    }).finally(() => setLoading(false));
+  }, [authLoading, user]);
 
-  if (authLoading || loading) return <main className="container mx-auto p-8 flex justify-center"><div className="text-center"><div className="text-4xl animate-bounce mb-3">🌤</div><p className="text-zinc-500">Loading advisories…</p></div></main>;
+  if (authLoading || loading) return (
+    <main className="flex justify-center items-center min-h-screen" style={{ background: "#faf8f4" }}>
+      <div className="text-center"><div className="spinner mx-auto mb-4"></div><p className="font-semibold" style={{ color: "#6d4d22" }}>Loading advisories…</p></div>
+    </main>
+  );
   if (!user) return null;
 
   return (
-    <main className="container mx-auto max-w-6xl p-6 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-900">Ecosystem Advisories</h1>
-        <p className="text-zinc-500 text-sm mt-1">Live weather updates and real-time mandi prices.</p>
+    <main className="min-h-screen" style={{ background: "#faf8f4" }}>
+      {/* Header */}
+      <div className="relative h-36 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&q=80" alt="Farm advisories" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(18,43,15,0.75), rgba(30,66,24,0.9))" }} />
+        <div className="relative container mx-auto max-w-6xl px-6 h-full flex flex-col justify-center">
+          <h1 className="text-3xl font-extrabold text-white animate-fade-up">Ecosystem Advisories</h1>
+          <p className="text-sm mt-1 animate-fade-up delay-100" style={{ color: "#b8e3af" }}>Live weather and real-time mandi market prices</p>
+        </div>
       </div>
 
-      {error && <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>}
+      <div className="container mx-auto max-w-6xl px-6 py-8">
+        {error && <div className="mb-6 px-4 py-3 rounded-xl text-sm font-semibold" style={{ background: "#fee2e2", color: "#dc2626" }}>{error}</div>}
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Weather Hero Card (Spans 1 col on large screens) */}
-        {weather && (
-          <section className="lg:col-span-1">
-            <div className="bg-gradient-to-b from-sky-400 to-sky-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden h-full flex flex-col">
-              <div className="absolute top-0 right-0 p-4 opacity-20 text-8xl">
-                {weather.today.rainChance > 50 ? "🌧" : "☀️"}
-              </div>
-              
-              <div className="flex justify-between items-start relative z-10 mb-8">
-                <div>
-                  <h2 className="font-bold text-sky-100 flex items-center gap-1">📍 {weather.location}</h2>
-                  <p className="text-xs text-sky-200 mt-1">{new Date(weather.observedAt).toLocaleDateString()}</p>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Weather Card */}
+          {weather ? (
+            <section className="lg:col-span-1 animate-slide-in-left">
+              <div className="relative rounded-3xl overflow-hidden h-full shadow-xl text-white" style={{ minHeight: "320px" }}>
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80" alt="Weather" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(18,43,15,0.6), rgba(30,66,24,0.92))" }} />
+                <div className="relative h-full p-6 flex flex-col justify-between">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h2 className="font-bold text-sm" style={{ color: "#b8e3af" }}>Live Weather</h2>
+                      <p className="font-extrabold text-lg">{weather.location}</p>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: "rgba(74,156,61,0.3)", border: "1px solid #4a9c3d", color: "#b8e3af" }}>LIVE</span>
+                  </div>
+                  <div>
+                    <div className="text-6xl font-black tracking-tighter mb-3">{weather.current.temperature_2m}<span className="text-3xl font-medium" style={{ color: "#b8e3af" }}>°C</span></div>
+                    <div className="flex gap-5 text-sm font-semibold mb-4" style={{ color: "#dff2da" }}>
+                      <div>Rain: {weather.today.rainChance}%</div>
+                      <div>Wind: {weather.current.wind_speed_10m} km/h</div>
+                    </div>
+                    <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                      <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#b8e3af" }}>Smart Advisory</p>
+                      <p className="text-sm font-semibold leading-relaxed">{weather.advisory}</p>
+                    </div>
+                  </div>
                 </div>
-                <span className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase">Live Sync</span>
               </div>
-              
-              <div className="relative z-10 mb-8">
-                <div className="text-6xl font-extrabold tracking-tighter">
-                  {weather.current.temperature_2m}°<span className="text-4xl text-sky-200 font-medium">C</span>
-                </div>
-                <div className="flex gap-4 mt-3 text-sm font-medium text-sky-100">
-                  <div className="flex items-center gap-1"><span>💧</span> {weather.today.rainChance}% Rain</div>
-                  <div className="flex items-center gap-1"><span>💨</span> {weather.current.wind_speed_10m} km/h</div>
+            </section>
+          ) : null}
+
+          {/* eNAM Prices */}
+          <section className={`lg:col-span-${weather ? "2" : "3"} animate-fade-up delay-200`}>
+            <div className="bg-white rounded-3xl p-6 h-full shadow-sm" style={{ border: "1px solid #e8d0a3" }}>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-extrabold" style={{ color: "#1e4218" }}>Live Mandi Prices</h2>
+                <div className="flex items-center gap-2 text-[10px] font-bold px-3 py-1.5 rounded-full" style={{ background: "#f5ead6", color: "#8b6330" }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#a87c42" }}></span>
+                  eNAM Network
                 </div>
               </div>
-              
-              <div className="mt-auto relative z-10 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
-                <div className="text-xs font-bold text-sky-200 uppercase tracking-wider mb-2">Smart Advisory</div>
-                <p className="text-sm font-medium leading-relaxed">
-                  {weather.advisory}
-                </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {prices.map((price) => (
+                  <div key={`${price.cropName}-${price.market}`} className="flex items-center gap-4 p-4 rounded-2xl border hover:-translate-y-0.5 transition-all duration-200 cursor-default" style={{ border: "1px solid #e8d0a3" }}>
+                    <img src={cropImg(price.cropName)} alt={price.cropName} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold truncate" style={{ color: "#1e4218" }}>{price.cropName}</h3>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "#8b6330" }}>{price.market}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-xl font-extrabold" style={{ color: "#2d6324" }}>&#8377;{price.modalPricePerKg}</div>
+                      <div className="text-[10px] uppercase tracking-wider font-bold" style={{ color: "#a87c42" }}>per {price.unit}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
-        )}
-
-        {/* eNAM Prices (Spans 2 cols on large screens) */}
-        <section className={`lg:col-span-${weather ? '2' : '3'}`}>
-          <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 h-full">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold text-zinc-900">Live Mandi Prices</h2>
-              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                eNAM Network
-              </span>
-            </div>
-            
-            <div className="grid sm:grid-cols-2 gap-4">
-              {prices.map((price) => (
-                <div key={`${price.cropName}-${price.market}`} className="flex items-center p-4 rounded-2xl border border-zinc-100 bg-zinc-50 hover:bg-emerald-50 hover:border-emerald-200 transition-colors group">
-                  <div className="text-4xl mr-4">{cropEmoji(price.cropName)}</div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-zinc-900 group-hover:text-emerald-800 transition-colors">{price.cropName}</h3>
-                    <p className="text-xs text-zinc-500 mt-0.5 flex items-center gap-1">📍 {price.market}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-extrabold text-emerald-700">₹{price.modalPricePerKg}</div>
-                    <div className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">per {price.unit}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        </div>
       </div>
     </main>
   );
