@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
 import type { Listing } from "../../lib/types";
-import { getPriceSuggestion, type PriceSuggestion } from "../../lib/ai";
+import { getPriceSuggestion, gradeImage, transcribeListing, type ImageGrade, type PriceSuggestion } from "../../lib/ai";
 
 const GRADES = ["A", "B", "C", "D"] as const;
 const GRADE_LABELS: Record<string, string> = { A: "Grade A — Premium", B: "Grade B — Standard", C: "Grade C — Processing", D: "Grade D" };
@@ -35,6 +35,13 @@ export default function FarmerPage() {
   const [showForm, setShowForm] = useState(false);
   const [priceSuggestion, setPriceSuggestion] = useState<PriceSuggestion | null>(null);
   const [suggestingPrice, setSuggestingPrice] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [voiceNote, setVoiceNote] = useState<string>("");
+  const recorderRef = useRef<any | null>(null);
+  const [gradeLoading, setGradeLoading] = useState(false);
+  const [gradeResult, setGradeResult] = useState<ImageGrade | null>(null);
+  const [cropImagePreview, setCropImagePreview] = useState<string | null>(null);
   const [form, setForm] = useState({
     cropName: "", variety: "", quantity: "", pricePerUnit: "",
     qualityGrade: "A" as typeof GRADES[number], harvestDate: "", address: "", fpoAggregation: false,
@@ -89,6 +96,73 @@ export default function FarmerPage() {
     } finally { setSuggestingPrice(false); }
   }
 
+  async function startRecording() {
+    // getUserMedia / MediaRecorder are WebKit extensions (Safari/newer browsers).
+    const nav: any = navigator;
+    const getUserMedia = nav.mediaDevices?.getUserMedia || nav.getUserMedia;
+    if (typeof getUserMedia !== "function") {
+      setError("Voice input is not supported in this browser. Upload a photo or type the details instead.");
+      return;
+    }
+    setError("");
+    try {
+      const stream: any = await getUserMedia({ audio: true });
+      const rec: any = new nav.MediaRecorder(stream, { mimeType: nav.mimeType || "audio/webm" });
+      const chunks: Blob[] = [];
+      rec.ondataavailable = (e: any) => { if (e && e.data && e.data.size > 0) chunks.push(e.data); };
+      rec.onstop = async () => {
+        try { stream.getTracks().forEach((t: any) => t.stop()); } catch { /* ignore */ }
+        setRecording(false);
+        const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
+        if (blob.size > 0) await submitTranscript(blob);
+      };
+      recorderRef.current = rec;
+      rec.start();
+      setRecording(true);
+    } catch {
+      setError("Could not access the microphone. Please allow mic access or type the details.");
+    }
+  }
+
+  function stopRecording() {
+    const rec: any = recorderRef.current;
+    if (rec && rec.state && rec.state !== "inactive") rec.stop();
+    else if (rec) rec.stop();
+  }
+
+  async function submitTranscript(blob: Blob) {
+    setTranscribing(true); setError("");
+    try {
+      const result = await transcribeListing(blob);
+      setVoiceNote(result.transcript || "");
+      setForm((p) => ({
+        ...p,
+        cropName: result.cropName && result.cropName !== "Unknown crop" ? result.cropName : p.cropName,
+        variety: p.variety || result.variety || "",
+        quantity: result.quantityKg ? String(Math.round(result.quantityKg)) : p.quantity,
+        pricePerUnit: result.pricePerKg ? String(result.pricePerKg) : p.pricePerUnit,
+        qualityGrade: (["A", "B", "C", "D"].includes(result.qualityGrade || "") ? result.qualityGrade : p.qualityGrade) as typeof GRADES[number],
+        address: p.address || result.location || "",
+      }));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to transcribe voice note");
+    } finally { setTranscribing(false); }
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCropImagePreview(URL.createObjectURL(file));
+    setGradeResult(null); setGradeLoading(true); setError("");
+    try {
+      const result = await gradeImage(file, form.cropName || undefined);
+      setGradeResult(result);
+      setForm((p) => ({ ...p, qualityGrade: (result.qualityGrade as typeof GRADES[number]) || p.qualityGrade }));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to grade the crop image");
+    } finally { setGradeLoading(false); }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.cropName || !form.quantity || !form.pricePerUnit || !form.harvestDate) {
@@ -106,6 +180,7 @@ export default function FarmerPage() {
       setShowForm(false);
       setForm({ cropName: "", variety: "", quantity: "", pricePerUnit: "", qualityGrade: "A", harvestDate: "", address: "", fpoAggregation: false });
       setPriceSuggestion(null);
+      setVoiceNote(""); setGradeResult(null); setCropImagePreview(null);
       await loadListings();
     } catch (err: unknown) { setError(err instanceof Error ? err.message : "Failed to create listing"); }
   }
@@ -131,7 +206,7 @@ export default function FarmerPage() {
           </p>
         </div>
         <button
-          onClick={() => { setShowForm(true); setError(""); setPriceSuggestion(null); }}
+          onClick={() => { setShowForm(true); setError(""); setPriceSuggestion(null); setVoiceNote(""); setGradeResult(null); setCropImagePreview(null); }}
           className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all shadow-sm hover:-translate-y-0.5 text-sm"
         >
           + List New Produce
@@ -152,6 +227,59 @@ export default function FarmerPage() {
             <p className="text-sm text-emerald-700">Fill in the details below. Use AI to get a price suggestion.</p>
           </div>
           <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            {/* ── WhisperFlow: voice listing in local language ── */}
+            <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">🎙️</span>
+                <span className="text-sm font-bold text-violet-800">Speak your listing — any local language</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 uppercase tracking-wider">WhisperFlow</span>
+              </div>
+              <p className="text-xs text-violet-600 mb-3">
+                Record a voice note in Hindi or your mother tongue (e.g. “मेरे पास टमाटर है, पाँच सौ किलो, दाम पैंतीस रुपये”) and the form autofills.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => (recording ? stopRecording() : void startRecording())}
+                  disabled={transcribing}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all disabled:opacity-50 ${recording ? "bg-red-600 text-white hover:bg-red-700" : "bg-violet-600 text-white hover:bg-violet-700"}`}
+                >
+                  {recording ? "⏹ Stop & Transcribe" : "🎙 Start Recording"}
+                </button>
+                {transcribing && <span className="text-sm text-violet-600">⏳ Listening & transcribing…</span>}
+                {voiceNote && (
+                  <span className="text-xs text-violet-500 flex items-center gap-1 truncate max-w-full">
+                    🗒 {voiceNote}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* ── AI crop image grading ── */}
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">📷</span>
+                <span className="text-sm font-bold text-emerald-800">Grade your produce by photo</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 uppercase tracking-wider">AI Vision</span>
+              </div>
+              <p className="text-xs text-emerald-600 mb-3">Upload a photo of your crop and the AI will analyse it and auto-set the quality grade.</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all ${gradeLoading ? "opacity-50 pointer-events-none" : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"}`}>
+                  {gradeLoading ? "⏳ Analysing photo…" : "📤 Upload Crop Photo"}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                </label>
+                {gradeResult && (
+                  <div className="bg-white rounded-lg border border-emerald-200 px-4 py-2 flex-1 min-w-[220px]">
+                    <div className="text-sm font-bold text-emerald-700 flex items-center gap-1">
+                      AI Grade: {gradeResult.qualityGrade}
+                      <span className="text-[10px] text-zinc-400 font-medium">({Math.round(gradeResult.confidence * 100)}% confidence)</span>
+                    </div>
+                    <div className="text-[10px] text-zinc-400 mt-0.5">{gradeResult.message}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-zinc-700 mb-1.5">Crop Name *</label>
@@ -237,7 +365,7 @@ export default function FarmerPage() {
               <button type="submit" className="flex-1 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all shadow-sm text-sm">
                 Publish Listing
               </button>
-              <button type="button" onClick={() => { setShowForm(false); setError(""); setPriceSuggestion(null); }}
+              <button type="button" onClick={() => { setShowForm(false); setError(""); setPriceSuggestion(null); setGradeResult(null); setCropImagePreview(null); }}
                 className="px-6 py-3 border border-zinc-200 rounded-xl text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-all">
                 Cancel
               </button>

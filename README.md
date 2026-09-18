@@ -75,7 +75,7 @@ Fasalo is a digital marketplace platform that eliminates unnecessary middlemen i
 | **Quality Grading via Image Recognition** | Farmer uploads produce photo → AI auto-assigns quality grade, reducing manual inspection disputes. |
 | **Crop Recommendation Engine** | Suggests which crops to grow next season based on regional demand trends and price forecasts. |
 
-> **Phase 4 demo status:** `ai-services/` is a separate FastAPI service exposing demand forecast, route, price suggestion, and quality-grading endpoints. Forecast, route, and price use transparent sample-data heuristics; quality grading is an explicitly marked AI-ready mock until trained on a labelled image dataset.
+> **Phase 4 demo status:** `ai-services/` is a separate FastAPI service exposing demand forecast, route, price suggestion, quality-grading, and voice-transcription endpoints. Forecast, route, and price use transparent sample-data heuristics; quality grading runs **live on-device** via an OpenCV computer-vision engine (upload a crop photo → A/B/C/D grade + confidence), and voice listing uses WhisperFlow (OpenAI Whisper) to transcribe a farmer's local-language voice note into auto-filled listing fields.
 
 ---
 
