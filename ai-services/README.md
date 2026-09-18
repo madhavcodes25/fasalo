@@ -31,7 +31,7 @@ cd ai-services
 python -m venv .venv
 # Windows PowerShell: .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+./venv/bin/python -m uvicorn main:app --reload --port 8000
 ```
 
 Interactive API documentation: `http://localhost:8000/docs`
