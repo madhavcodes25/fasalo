@@ -1,19 +1,19 @@
 {
   "users": [
     {
-      "name": "Demo Farmer",
+      "name": "Ramesh Kumar",
       "email": "farmer@fasalo.com",
       "passwordHash": "$2b$10$XP/pSkQcsOZbPU2PjWn0be5tEyv8j803idHi56kMvE5UQ8qWDjrke",
       "role": "farmer",
-      "village": "Ludhiana, Punjab",
-      "farmSizeAcres": 6,
+      "village": "Nashik",
+      "farmSizeAcres": 12,
       "kycVerified": true,
       "id": "u-farmer",
       "createdAt": "2026-09-05T00:00:00.000Z",
       "updatedAt": "2026-09-05T00:00:00.000Z"
     },
     {
-      "name": "Demo Consumer",
+      "name": "Priya Sharma",
       "email": "consumer@fasalo.com",
       "passwordHash": "$2b$10$XP/pSkQcsOZbPU2PjWn0be5tEyv8j803idHi56kMvE5UQ8qWDjrke",
       "role": "consumer",
@@ -23,7 +23,7 @@
       "updatedAt": "2026-09-05T00:00:00.000Z"
     },
     {
-      "name": "Demo Bulk Buyer",
+      "name": "Metro Grocers Pvt Ltd",
       "email": "bulk@fasalo.com",
       "passwordHash": "$2b$10$XP/pSkQcsOZbPU2PjWn0be5tEyv8j803idHi56kMvE5UQ8qWDjrke",
       "role": "bulk_buyer",
@@ -35,46 +35,90 @@
   ],
   "listings": [
     {
+      "id": "5e75d695-f46b-4e3f-a350-31906138e855",
       "farmerId": "u-farmer",
       "cropName": "Tomato",
-      "variety": "Desi",
+      "variety": "Desi Red",
       "quantity": 500,
       "unit": "kg",
-      "pricePerUnit": 22,
+      "pricePerUnit": 32,
       "qualityGrade": "A",
-      "harvestDate": "2026-09-10",
+      "harvestDate": "2026-09-20",
       "location": {
-        "lat": 30.9,
-        "lng": 75.9,
-        "address": "Ludhiana, Punjab"
+        "lat": 20.0,
+        "lng": 73.8,
+        "address": "Nashik, Maharashtra"
       },
       "fpoAggregation": false,
       "status": "active",
-      "id": "l-tomato",
-      "createdAt": "2026-09-05T00:00:00.000Z",
-      "updatedAt": "2026-09-05T00:00:00.000Z"
+      "createdAt": "2026-09-18T10:11:19.220115Z",
+      "updatedAt": "2026-09-18T10:11:19.220117Z"
     },
     {
+      "id": "4c7ecab1-4a12-4e09-b0b6-0b096c36ac2a",
       "farmerId": "u-farmer",
       "cropName": "Onion",
-      "variety": "NASIK RED",
+      "variety": "Lasalgaon",
       "quantity": 1200,
       "unit": "kg",
-      "pricePerUnit": 18,
-      "qualityGrade": "B",
-      "harvestDate": "2026-09-12",
+      "pricePerUnit": 24,
+      "qualityGrade": "A",
+      "harvestDate": "2026-09-21",
       "location": {
-        "lat": 30.9,
-        "lng": 75.9,
-        "address": "Ludhiana, Punjab"
+        "lat": 20.1,
+        "lng": 74.0,
+        "address": "Lasalgaon, Maharashtra"
       },
       "fpoAggregation": true,
       "status": "active",
-      "id": "l-onion",
-      "createdAt": "2026-09-05T00:00:00.000Z",
-      "updatedAt": "2026-09-05T00:00:00.000Z"
+      "createdAt": "2026-09-18T10:11:19.220132Z",
+      "updatedAt": "2026-09-18T10:11:19.220133Z"
+    },
+    {
+      "id": "1155228c-5ee9-4f32-9258-7b883b7e5d2c",
+      "farmerId": "u-farmer",
+      "cropName": "Potato",
+      "variety": "Jyoti",
+      "quantity": 800,
+      "unit": "kg",
+      "pricePerUnit": 22,
+      "qualityGrade": "B",
+      "harvestDate": "2026-09-23",
+      "location": {
+        "lat": 20.0,
+        "lng": 73.8,
+        "address": "Nashik, Maharashtra"
+      },
+      "fpoAggregation": false,
+      "status": "active",
+      "createdAt": "2026-09-18T10:11:19.220141Z",
+      "updatedAt": "2026-09-18T10:11:19.220142Z"
+    },
+    {
+      "id": "44aa292c-f388-45da-9b07-0b7003c5260a",
+      "farmerId": "u-farmer",
+      "cropName": "Okra",
+      "variety": "Punjab Padmini",
+      "quantity": 200,
+      "unit": "kg",
+      "pricePerUnit": 48,
+      "qualityGrade": "A",
+      "harvestDate": "2026-09-19",
+      "location": {
+        "lat": 20.0,
+        "lng": 73.8,
+        "address": "Nashik, Maharashtra"
+      },
+      "fpoAggregation": false,
+      "status": "active",
+      "createdAt": "2026-09-18T10:11:19.220149Z",
+      "updatedAt": "2026-09-18T10:11:19.220149Z"
     }
   ],
   "orders": [],
-  "bids": []
+  "bids": [],
+  "shipments": [],
+  "escrowPayments": [],
+  "disputes": [],
+  "reviews": []
 }

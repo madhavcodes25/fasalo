@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 import { LanguageProvider } from "../context/LanguageContext";
@@ -20,10 +21,19 @@ export default function RootLayout({
       lang="en"
       className={`h-full antialiased font-sans`}
     >
+      <head>
+        <Script id="google-translate-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
+          function googleTranslateElementInit() { 
+            new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'hi,en', autoDisplay: false}, 'google_translate_element'); 
+          }
+        ` }} />
+        <Script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" strategy="afterInteractive" />
+      </head>
       <body className="min-h-full flex flex-col">
         <AuthProvider>
           <LanguageProvider><Header />{children}</LanguageProvider>
         </AuthProvider>
+        <div id="google_translate_element" style={{ display: 'none' }}></div>
       </body>
     </html>
   );

@@ -1,0 +1,13 @@
+{
+  "name": "fasalo-root",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:ai": "cd ai-services && uvicorn main:app --reload --port 8000",
+    "dev": "npx concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:ai\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -2,155 +2,135 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Leaf, ShieldCheck, Truck, Sparkles, Server } from "lucide-react";
 
-type HealthResponse = { status: string; service: string; timestamp: string; db: string; };
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
 
+type HealthStatus = "checking" | "ok" | "error";
+
+const FEATURES = [
+  { icon: "🌾", title: "Direct Trading", desc: "Farmers list produce directly — no mandi agents, no commission layers.", color: "bg-green-50 border-green-200" },
+  { icon: "🔒", title: "Escrow Payments", desc: "Funds held securely until delivery is confirmed, protecting both sides.", color: "bg-blue-50 border-blue-200" },
+  { icon: "🚛", title: "Smart Logistics", desc: "Cold storage locators + real-time shipment tracking to reduce spoilage.", color: "bg-amber-50 border-amber-200" },
+  { icon: "✨", title: "AI Pricing", desc: "Market-data-backed price suggestions so farmers always list at a fair price.", color: "bg-purple-50 border-purple-200" },
+];
+
+const STEPS = [
+  { num: "1", title: "Farmer lists produce", desc: "Enter crop details, get an AI price suggestion, publish the listing." },
+  { num: "2", title: "Buyer places order", desc: "Consumer buys direct; bulk buyer submits a bid for large volumes." },
+  { num: "3", title: "Escrow + Delivery", desc: "Payment is held in escrow. Released to farmer only after confirmed delivery." },
+];
+
 export default function HomePage() {
-  const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<HealthStatus>("checking");
 
-  const runHealthCheck = () => {
-    setLoading(true); setError(null);
+  useEffect(() => {
     fetch(`${BACKEND_URL}/api/health`)
-      .then((res) => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
-      .then(setHealth)
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { void runHealthCheck(); }, []);
+      .then((r) => { if (!r.ok) throw new Error(); setStatus("ok"); })
+      .catch(() => setStatus("error"));
+  }, []);
 
   return (
-    <main className="flex flex-1 flex-col min-h-screen bg-zinc-50 font-sans selection:bg-emerald-200">
-      
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-emerald-900 pt-20 pb-32 text-white">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-zinc-50 to-transparent"></div>
-        
-        <div className="container relative mx-auto max-w-5xl px-6 text-center z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/50 text-emerald-200 text-xs font-semibold tracking-wide uppercase mb-8 shadow-sm backdrop-blur-md">
-            <span>Smart India Hackathon</span>
-            <span className="w-1 h-1 rounded-full bg-emerald-400"></span>
-            <span>Problem 26033</span>
+    <main className="min-h-screen bg-slate-50">
+      {/* Hero */}
+      <section className="relative bg-emerald-800 overflow-hidden">
+        <div className="absolute inset-0 opacity-10"
+          style={{ backgroundImage: "radial-gradient(circle at 25% 50%, #6ee7b7 0%, transparent 50%), radial-gradient(circle at 75% 20%, #34d399 0%, transparent 40%)" }} />
+        <div className="relative container mx-auto max-w-5xl px-6 py-20 md:py-28 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-700/80 border border-emerald-600 text-emerald-200 text-xs font-semibold tracking-widest uppercase mb-8">
+            Smart India Hackathon 2026 • Problem 26033
           </div>
-          
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 leading-tight">
-            Fasal Seedhe <span className="text-emerald-400">Aapke Paas</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight tracking-tight mb-6">
+            फसल सीधे <span className="text-emerald-300">आपके पास</span>
+            <span className="block text-2xl sm:text-3xl font-medium text-emerald-200 mt-3">
+              From Farm to Table — No Middlemen
+            </span>
           </h1>
-          
-          <p className="mx-auto max-w-2xl text-lg sm:text-xl text-emerald-100/90 mb-10 leading-relaxed font-light">
-            Eliminating intermediaries to ensure farmers earn more and consumers pay less. 
-            A transparent, AI-driven digital marketplace for India's agricultural future.
+          <p className="text-emerald-100 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+            Fasalo directly connects <strong className="text-white">farmers & FPOs</strong> with retail consumers and bulk buyers — with AI-powered pricing, escrow protection, and real-time logistics.
           </p>
-          
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link href="/browse" className="group flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-emerald-900/20 transition-all hover:bg-emerald-400 hover:shadow-emerald-900/40 hover:-translate-y-1 w-full sm:w-auto">
-              Browse Marketplace
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link href="/browse" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-emerald-800 font-bold rounded-xl shadow-lg hover:bg-emerald-50 transition-all hover:-translate-y-0.5 text-base">
+              🛒 Browse Marketplace
             </Link>
-            <Link href="/signup" className="flex items-center justify-center rounded-xl border-2 border-emerald-700/50 bg-emerald-800/30 px-8 py-4 text-base font-bold text-white backdrop-blur-sm transition-all hover:bg-emerald-800/50 hover:border-emerald-600 hover:-translate-y-1 w-full sm:w-auto">
-              Register as Farmer / Buyer
+            <Link href="/signup" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl border-2 border-emerald-500 hover:bg-emerald-500 transition-all hover:-translate-y-0.5 text-base">
+              🌾 I&apos;m a Farmer / Buyer
             </Link>
+          </div>
+
+          {/* Backend status pill */}
+          <div className="mt-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-900/60 text-xs text-emerald-300">
+            <span className={`w-2 h-2 rounded-full ${status === "ok" ? "bg-emerald-400 animate-pulse" : status === "error" ? "bg-red-400" : "bg-zinc-400"}`} />
+            {status === "ok" ? "Backend online" : status === "error" ? "Backend offline" : "Connecting…"}
           </div>
         </div>
       </section>
 
-      {/* Feature Grid */}
-      <section className="container mx-auto max-w-6xl px-6 -mt-16 relative z-20 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          
-          <div className="bg-white rounded-2xl p-6 shadow-xl shadow-zinc-200/50 border border-zinc-100 transition-transform hover:-translate-y-1">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-5"><Leaf className="w-6 h-6" /></div>
-            <h3 className="text-xl font-bold text-zinc-900 mb-2">Direct Trading</h3>
-            <p className="text-sm text-zinc-600 leading-relaxed">Connect directly with bulk buyers and consumers. Set your own prices based on real market data without middleman cuts.</p>
-          </div>
-          
-          <div className="bg-white rounded-2xl p-6 shadow-xl shadow-zinc-200/50 border border-zinc-100 transition-transform hover:-translate-y-1">
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-5"><ShieldCheck className="w-6 h-6" /></div>
-            <h3 className="text-xl font-bold text-zinc-900 mb-2">Escrow Trust</h3>
-            <p className="text-sm text-zinc-600 leading-relaxed">Payments are held securely in escrow until delivery is confirmed, protecting both farmers from default and buyers from fraud.</p>
-          </div>
-          
-          <div className="bg-white rounded-2xl p-6 shadow-xl shadow-zinc-200/50 border border-zinc-100 transition-transform hover:-translate-y-1">
-            <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-5"><Truck className="w-6 h-6" /></div>
-            <h3 className="text-xl font-bold text-zinc-900 mb-2">Smart Logistics</h3>
-            <p className="text-sm text-zinc-600 leading-relaxed">Integrated cold-storage locators and live shipment tracking to drastically reduce spoilage of perishable goods.</p>
-          </div>
-          
-          <div className="bg-white rounded-2xl p-6 shadow-xl shadow-zinc-200/50 border border-zinc-100 transition-transform hover:-translate-y-1">
-            <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-5"><Sparkles className="w-6 h-6" /></div>
-            <h3 className="text-xl font-bold text-zinc-900 mb-2">AI Intelligence</h3>
-            <p className="text-sm text-zinc-600 leading-relaxed">Leverage dynamic price suggestions, crop demand forecasting, and optimized routing algorithms.</p>
-          </div>
-
+      {/* Features */}
+      <section className="container mx-auto max-w-6xl px-6 py-20">
+        <h2 className="text-2xl font-bold text-center text-zinc-800 mb-3">Built for India&apos;s Farmers</h2>
+        <p className="text-zinc-500 text-center mb-12 max-w-xl mx-auto">Every feature addresses a real pain point in the agricultural supply chain.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {FEATURES.map((f) => (
+            <div key={f.title} className={`rounded-2xl border p-6 ${f.color} hover:-translate-y-1 transition-transform`}>
+              <div className="text-3xl mb-4">{f.icon}</div>
+              <h3 className="font-bold text-zinc-900 mb-2">{f.title}</h3>
+              <p className="text-sm text-zinc-600 leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* System Status Section */}
-      <section className="container mx-auto max-w-3xl px-6 pb-24">
-        <div className="bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl shadow-zinc-900/20 border border-zinc-800">
-          <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
-            <div className="flex items-center gap-3 text-zinc-300 font-medium">
-              <Server className="w-5 h-5 text-emerald-500" />
-              <span>System Health Check</span>
-            </div>
-            <button onClick={runHealthCheck} disabled={loading} className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-md transition-colors disabled:opacity-50">
-              {loading ? "Pinging..." : "Refresh"}
-            </button>
+      {/* How it works */}
+      <section className="bg-white border-y border-zinc-200 py-20">
+        <div className="container mx-auto max-w-4xl px-6">
+          <h2 className="text-2xl font-bold text-center text-zinc-800 mb-3">How Fasalo Works</h2>
+          <p className="text-zinc-500 text-center mb-12">A complete end-to-end transaction in 3 steps.</p>
+          <div className="flex flex-col md:flex-row gap-0">
+            {STEPS.map((step, i) => (
+              <div key={step.num} className="flex-1 flex flex-col items-center text-center p-6 relative">
+                {i < STEPS.length - 1 && (
+                  <div className="hidden md:block absolute top-11 w-full h-0.5 bg-emerald-200" style={{ left: "50%" }} />
+                )}
+                <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-bold text-lg flex items-center justify-center mb-4 relative z-10 shadow-md">
+                  {step.num}
+                </div>
+                <h3 className="font-bold text-zinc-900 mb-2">{step.title}</h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
           </div>
-          
-          <div className="p-6 bg-zinc-900">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-zinc-400">Endpoint: <code className="text-emerald-400 bg-zinc-950 px-2 py-1 rounded ml-1">{BACKEND_URL}/api/health</code></span>
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  {health?.status === "ok" ? (
-                    <><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></>
-                  ) : loading ? (
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-zinc-500"></span>
-                  ) : (
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                  )}
-                </span>
-                <span className={`text-sm font-semibold ${health?.status === "ok" ? "text-emerald-500" : error ? "text-red-500" : "text-zinc-500"}`}>
-                  {health?.status === "ok" ? "Online" : error ? "Offline" : "Checking..."}
-                </span>
-              </div>
-            </div>
+        </div>
+      </section>
 
-            {error && (
-              <div className="mt-4 p-4 rounded-lg bg-red-950/50 border border-red-900 text-sm text-red-400">
-                <p className="font-semibold mb-1">Connection Failed</p>
-                <p>{error}. Is the backend running on port 4000?</p>
+      {/* CTA */}
+      <section className="container mx-auto max-w-3xl px-6 py-20 text-center">
+        <div className="bg-emerald-800 rounded-3xl p-10 text-white">
+          <h2 className="text-2xl font-bold mb-4">Ready to Demo?</h2>
+          <p className="text-emerald-200 mb-8">Use the demo accounts below — no setup required.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mb-8">
+            {[
+              { role: "🌾 Farmer", email: "farmer@fasalo.com" },
+              { role: "🛒 Consumer", email: "consumer@fasalo.com" },
+              { role: "🏭 Bulk Buyer", email: "bulk@fasalo.com" },
+            ].map((a) => (
+              <div key={a.email} className="bg-emerald-700/60 rounded-xl p-4 text-left">
+                <div className="font-semibold mb-1">{a.role}</div>
+                <div className="text-emerald-200 text-xs">{a.email}</div>
+                <div className="text-emerald-300 text-xs">password: secret123</div>
               </div>
-            )}
-
-            {health && (
-              <div className="mt-4 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
-                <pre className="p-4 text-xs font-mono text-emerald-400 overflow-x-auto">
-                  {JSON.stringify(health, null, 2)}
-                </pre>
-              </div>
-            )}
+            ))}
           </div>
+          <Link href="/login" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-emerald-800 font-bold rounded-xl hover:bg-emerald-50 transition-all hover:-translate-y-0.5">
+            Login to Demo →
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-200 bg-white py-10 mt-auto">
-        <div className="container mx-auto px-6 text-center flex flex-col items-center">
-          <div className="text-2xl font-bold text-emerald-800 mb-4">Fasalo 🌾</div>
-          <p className="text-sm text-zinc-500 max-w-md mx-auto mb-6">
-            Marketplace • Trust Layer • Logistics • AI Features
-            <br/>Built for the Smart India Hackathon.
-          </p>
-          <p className="text-xs font-semibold tracking-wider text-zinc-400 uppercase">
-            Ready for Demonstration
-          </p>
+      <footer className="border-t border-zinc-200 bg-white py-8">
+        <div className="container mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+          <div className="font-semibold text-zinc-700">🌾 Fasalo — Fasal Seedhe Aapke Paas</div>
+          <div>Smart India Hackathon 2026 • Problem Statement 26033 • Ministry of Consumer Affairs</div>
         </div>
       </footer>
     </main>

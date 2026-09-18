@@ -73,13 +73,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const data = await api.post<{ token: string; user: User }>("/auth/login", { email, password });
     persist(data.token, data.user);
-    router.push("/dashboard");
   };
 
   const signup = async (data: SignupData) => {
     const res = await api.post<{ token: string; user: User }>("/auth/signup", data);
     persist(res.token, res.user);
-    router.push("/dashboard");
   };
 
   const logout = () => {

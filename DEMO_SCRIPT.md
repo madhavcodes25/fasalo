@@ -1,19 +1,48 @@
-# Fasalo Demo Script — Smart India Hackathon
+# Fasalo: Smart India Hackathon 2026 Demo Script
+
+**Target Time:** 3 minutes  
+**Goal:** Show a complete end-to-end flow from farm to table, highlighting AI pricing, escrow protection, and logistics.
 
 ## Before presenting
-1. Start backend (`npm run dev` in `backend`), frontend (`npm run dev` in `frontend`), and AI service (`uvicorn main:app --reload --port 8000` in `ai-services`).
-2. Create a farmer and consumer account. The farmer needs one active listing.
+1. Open a terminal in the **root `fasalo` folder** and run:
+   ```bash
+   npm run dev
+   ```
+   *(This starts the backend, frontend, and AI microservice simultaneously via concurrently).*
+2. Open your browser to `http://localhost:3000`.
 
-## Two-minute flow
-1. **Farmer value:** In **My Listings**, enter Tomato and select **Get AI price suggestion**. State that this is sample-data based and model-ready.
-2. **Direct marketplace:** As a consumer, browse the listing and order it—no intermediary.
-3. **Trust:** As farmer, confirm the order. Explain escrow is held at confirmation.
-4. **Logistics:** Select a transporter under **Logistics**, then advance shipment tracking to delivered. The order status updates too.
-5. **Ecosystem:** Show **Advisories**: static eNAM-style price data and live weather guidance.
-6. **Insights:** Show **Dashboard** metrics/charts and toggle **हिंदी / EN**.
-7. **Close:** Production path: verified eNAM feed, partners/GPS, payment gateway, and trained image quality model.
+---
 
-## Demo honesty
-- eNAM, logistics lists, escrow, and AI price/forecast/route are demos or heuristics.
-- Weather is live.
-- Quality grading is AI-ready/mock, not live inference.
+## The Script (Action-by-Action)
+
+### Step 1: The Landing Page (0:00 - 0:20)
+* **Action**: Scroll through the homepage.
+* **Talking point**: "Welcome to Fasalo! We are directly connecting farmers with consumers and bulk buyers to solve Problem Statement 26033. Our platform features AI pricing, escrow protection, and smart logistics."
+* **Action**: Click the **Login** button.
+
+### Step 2: Farmer Listing & AI Pricing (0:20 - 1:10)
+* **Action**: On the login page, click the pre-filled **"Farmer Demo"** card (Ramesh Kumar) and hit Login.
+* **Action**: You'll land on the Farmer Dashboard. Briefly show the "Tomato Market Trend" graph and the top crop metrics.
+* **Action**: Navigate to **"My Listings"** using the top navbar.
+* **Action**: Click "Create New Listing". 
+* **Talking point**: "Let's list some fresh Tomatoes. Notice that as soon as we type 'Tomato' and our location, our AI Service calls the backend to predict the best market price based on historical eNAM data."
+* **Action**: Fill in the crop details and hit **Publish**.
+* **Action**: Click the user profile icon (top right) and click **Sign out**.
+
+### Step 3: Consumer Purchase & Escrow (1:10 - 2:00)
+* **Action**: Click the **"Consumer Demo"** card (Priya Sharma) and login.
+* **Talking point**: "Now, switching to the consumer's perspective. We skip all the middlemen."
+* **Action**: Go to **Browse** and click on the Tomato listing Ramesh just created.
+* **Action**: Click **Buy Now**.
+* **Talking point**: "The payment is now locked securely in Escrow. The farmer only gets paid once Priya confirms delivery."
+* **Action**: Go to **My Orders** to show the pending order in "Payment in Escrow" state.
+* **Action**: Sign out.
+
+### Step 4: Logistics & Completion (2:00 - 3:00)
+* **Action**: Log back in as **Ramesh (Farmer)**.
+* **Action**: Go to **Logistics**.
+* **Talking point**: "Ramesh sees the confirmed order and can now arrange transport. We also show nearby cold-storage capacities to prevent spoilage."
+* **Action**: Schedule the transport. Show the beautiful timeline progress bar tracking the shipment status.
+* **Action**: Go to **Advisories** to show the Live Weather integration and eNAM market prices.
+* **Action (Optional final wow factor)**: Click the **"हिंदी"** language button in the navbar to show the entire UI translating instantly via our integration!
+* **Talking point**: "With Fasalo, farmers get paid more, consumers pay less, and nothing goes to waste. Thank you!"
